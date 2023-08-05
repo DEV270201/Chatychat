@@ -1,0 +1,70 @@
+{% extends "chatbot/base.html" %}
+{% load crispy_forms_tags %}
+{% block body %}
+        <div class='container-fluid'>
+          <h5 class="mb-4 head" style="text-align:left;">Hello, {{user.username}}. How can I help you??</h5>
+                <input type="text" class="form-control" id="quest" placeholder="Enter your query">
+                <div class='flex my-2'>
+                        <button id='ask' class="btn btn-outline-primary" style="width:100px">Ask</button>
+                        <button id='clear' class="btn btn-outline-danger" style="width:100px">Clear</button>
+                </div>
+                <textarea class="form-control" id="answer" rows="3" disabled></textarea>
+        </div>
+{% endblock body %}
+{% block js %}
+<script>
+   let ask = document.getElementById('ask');
+   let clear = document.getElementById('clear');
+   let quest = document.getElementById('quest');
+   let asnwer = document.getElementById('answer');
+
+   async function askQuest(){
+       if(quest.value.trim() === ''){
+          alert('Please enter a query!!');
+          return;
+       }
+       //API call starts
+       try{
+               ask.disabled = true;
+               ask.innerHTML = 'Loading...'
+               clear.disabled = true;
+               let form = new FormData();
+               form.append("quest",quest.value);
+               form.append('csrfmiddlewaretoken','{{csrf_token}}');
+               let resp = await fetch('{% url "home" %}',{
+                method: 'POST',
+                body: form
+               });
+               let data = await resp.json();
+               if(data.error){
+                  throw data;
+               }
+               console.log("data : ",data);
+               answer.value = data.answer;
+               //setting to original if the request is successful
+               ask.disabled = false;
+               ask.innerHTML = 'Ask'
+               clear.disabled = false;
+       }catch(err){
+           console.log("error : ",error);
+           if(err.error){
+                alert(err.msg)
+           }else{
+                   alert('Sorry something went wrong!!');
+           }
+           ask.disabled = false;
+           ask.innerHTML = 'Ask'
+           clear.disabled = false;
+       }
+   }
+   
+   function clearQuest(){
+      quest.value = '';
+      answer.value = '';
+   }
+
+   ask.addEventListener('click',askQuest);
+   clear.addEventListener('click',clearQuest);
+</script>
+{% endblock js %}
+    

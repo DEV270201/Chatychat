@@ -1,0 +1,18 @@
+{% extends "chatbot/base.html" %}
+{% load crispy_forms_tags %} 
+{% block body %}
+<div class="container-fluid">
+  {% if data|length != 0%}
+      <h5 class="mb-4 head" style="text-align: left">Your Query History.....</h5>
+        {% for dt in data %}
+        <input type="text" class="form-control" value="{{dt.question}}" readonly />
+        <textarea class="form-control mb-3" id="answer" rows="3" readonly>{{dt.answer}}</textarea
+        >
+        {% endfor %} 
+  {%else%}
+        <h5 class="mb-4 head" style="text-align: left">
+            You haven't asked anything.....
+        </h5>
+  {% endif %}
+</div>
+{% endblock body %}
